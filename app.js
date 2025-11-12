@@ -1,8 +1,5 @@
 const API_KEY = "f269872efa4dce6e02988d4d89a68a9e";
-
-const GNEWS_URL = `https://gnews.io/api/v4/search?q=noticias&lang=es&country=mx&max=10&apikey=${API_KEY}`;
-
-const PROXY_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(GNEWS_URL)}`;
+const API_URL = `https://gnews.io/api/v4/top-headlines?lang=es&country=mx&max=10&apikey=${API_KEY}`;
 
 const newsContainer = document.getElementById("news-container");
 const refreshButton = document.getElementById("refreshButton");
@@ -12,16 +9,14 @@ async function fetchNews() {
     newsContainer.innerHTML = `<p class="placeholder">Cargando noticias...</p>`;
     refreshButton.textContent = "Cargando...";
 
-    const response = await fetch(PROXY_URL);
-    if (!response.ok) throw new Error(`Error HTTP o del Proxy: ${response.status}`);
-
-    const wrappedData = await response.json();
+    const response = await fetch(API_URL);
     
-    if (!wrappedData.contents) {
-        throw new Error("El servicio Proxy no devolvió contenido de GNews.");
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`GNews Error ${response.status}: ${errorData.errors ? errorData.errors.join(', ') : response.statusText}`);
     }
-    
-    const data = JSON.parse(wrappedData.contents);
+
+    const data = await response.json(); 
 
     if (!data.articles || data.articles.length === 0) {
       newsContainer.innerHTML = `<p>No se encontraron noticias disponibles.</p>`;
@@ -49,7 +44,7 @@ async function fetchNews() {
     setTimeout(() => (refreshButton.textContent = "Actualizar Noticias"), 2000);
 
   } catch (error) {
-    newsContainer.innerHTML = `<p style="color:red; font-weight: bold;">Ocurrió un error al cargar las noticias. Posiblemente la clave API expiró o el Proxy falló: ${error.message}</p>`;
+    newsContainer.innerHTML = `<p style="color:red; font-weight: bold;">⚠️ Error al cargar las noticias. Causa: ${error.message}</p>`;
     refreshButton.textContent = "Intentar de nuevo";
   }
 }
