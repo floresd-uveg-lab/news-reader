@@ -1,17 +1,23 @@
 const API_KEY = "f269872efa4dce6e02988d4d89a68a9e";
-const API_URL = `https://gnews.io/api/v4/top-headlines?category=general&lang=es&max=10&apikey=${API_KEY}`;
 
-const PROXY_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(API_URL)}`;
+const API_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(
+  `https://gnews.io/api/v4/top-headlines?category=general&lang=es&max=10&apikey=${API_KEY}`
+)}`;
+
+const newsContainer = document.getElementById("news-container");
+const refreshButton = document.getElementById("refreshButton");
 
 async function fetchNews() {
   try {
     newsContainer.innerHTML = `<p class="placeholder">Cargando noticias...</p>`;
 
-    const response = await fetch(PROXY_URL);
-    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
 
-    const proxyData = await response.json();
-    const data = JSON.parse(proxyData.contents);
+    const dataWrapped = await response.json();
+    const data = JSON.parse(dataWrapped.contents);
 
     if (!data.articles || data.articles.length === 0) {
       newsContainer.innerHTML = `<p>No se encontraron noticias disponibles.</p>`;
@@ -34,7 +40,15 @@ async function fetchNews() {
       newsContainer.appendChild(newsItem);
     });
 
+    refreshButton.textContent = "Actualizado";
+    setTimeout(() => (refreshButton.textContent = "Actualizar Noticias"), 2000);
+
   } catch (error) {
     newsContainer.innerHTML = `<p style="color:red;">Ocurrió un error al cargar las noticias: ${error.message}</p>`;
   }
 }
+
+refreshButton.textContent = "Actualizar Noticias";
+refreshButton.addEventListener("click", fetchNews);
+
+fetchNews();
