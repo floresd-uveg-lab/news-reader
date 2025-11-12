@@ -1,6 +1,5 @@
 const API_KEY = "f269872efa4dce6e02988d4d89a68a9e";
 
-// Usaremos el endpoint de búsqueda con la palabra clave "noticias"
 const API_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(
   `https://gnews.io/api/v4/search?q=noticias&lang=es&country=mx&max=10&apikey=${API_KEY}`
 )}`;
@@ -15,7 +14,6 @@ async function fetchNews() {
     const response = await fetch(API_URL);
     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
-    // El proxy de AllOrigins devuelve los datos envueltos
     const wrappedData = await response.json();
     const data = JSON.parse(wrappedData.contents);
 
@@ -24,7 +22,6 @@ async function fetchNews() {
       return;
     }
 
-    // Limpiamos contenedor
     newsContainer.innerHTML = "";
 
     data.articles.forEach(article => {
@@ -50,9 +47,7 @@ async function fetchNews() {
   }
 }
 
-// Inicializa el botón
 refreshButton.textContent = "Actualizar Noticias";
 refreshButton.addEventListener("click", fetchNews);
 
-// Cargar al iniciar
 fetchNews();
